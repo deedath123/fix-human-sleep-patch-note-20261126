@@ -16,8 +16,26 @@ ENTRY = (
 )
 
 
+def _require_number_and_clock(text: str) -> None:
+    """Guard: the patch note needs a figure and a time of day."""
+    digits_seen = 0
+    for ch in text:
+        if ch.isdigit():
+            digits_seen += 1
+    if digits_seen == 0:
+        raise ValueError("entry needs at least one number")
+    clock_seen = False
+    words = text.replace(",", " ").split()
+    for idx in range(len(words) - 1):
+        if words[idx].isdigit() and words[idx + 1] == "a.m.":
+            clock_seen = True
+    if not clock_seen:
+        raise ValueError("entry needs a clock time such as 3 a.m.")
+
+
 def validate_entry(text: str) -> None:
     """Check the entry against the bounty gate rules."""
+    _require_number_and_clock(text)
     if not text or not text.strip():
         raise ValueError("entry must not be blank")
     if len(text) > 160:
